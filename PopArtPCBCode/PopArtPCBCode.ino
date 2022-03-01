@@ -8,12 +8,23 @@ boolean currentButState = false;
 
 // finite state machine
 int state = 0;
+
+// for state 2
 int numGrid = 26;
 int numFrames = 3;
 int whichFrame = 0;
 unsigned long startTime = 0;
 unsigned long endTime = 0;
 int inter = 1000;
+
+//for state 1
+unsigned long startTime2 = 0;
+unsigned long endTime2 = 0;
+int inter2 = 10;
+int brightness = 1;
+int flip = 1;
+int redVal = 0;
+int greenVal = 0;
 
 char index[26]{
   // Insert Index Values Here
@@ -64,7 +75,8 @@ void setup() {
   strip.begin();
   strip.show();
   startTime=millis();
-//  strip.setBrightness(30);
+  startTime2=millis();
+  //strip.setBrightness(30);
 }
 
 void loop() {
@@ -74,7 +86,13 @@ void loop() {
   if(currentButState == HIGH && prevButState == LOW) {
     strip.clear();
     state = (state+1) % 3;
+    if(state == 1) {
+      startTime2=millis();
+      brightness = 0;
+      flip=1;
+    }
     if(state == 2) {
+      strip.setBrightness(255);
       startTime=millis();
       whichFrame = 0;
     }
@@ -86,9 +104,21 @@ void loop() {
       }
     break;
     case 1:
-      for(int i = 0; i < strip.numPixels(); i++) {
-        strip.setPixelColor(i,255,0,0);
+      endTime2 = millis();
+      if (endTime2 - startTime2 >= inter2) {
+        brightness = brightness+flip;
+        if(brightness == 255 || brightness == 0) {
+          flip = -flip;
+        }
+        startTime2 = millis();
       }
+      redVal = map(brightness,0,255,255,0);
+      greenVal = brightness;
+      for(int i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i,redVal,greenVal,0);
+      }
+      strip.setBrightness(brightness);
+      strip.show();
     break;
     case 2:
       endTime = millis();
