@@ -10,6 +10,10 @@ boolean currentButState = false;
 int state = 0;
 int numGrid = 26;
 int numFrames = 3;
+int whichFrame = 0;
+unsigned long startTime = 0;
+unsigned long endTime = 0;
+int inter = 1000;
 
 char index[26]{
   // Insert Index Values Here
@@ -59,6 +63,7 @@ void setup() {
   pinMode(buttonPin, INPUT);
   strip.begin();
   strip.show();
+  startTime=millis();
 //  strip.setBrightness(30);
 }
 
@@ -69,6 +74,10 @@ void loop() {
   if(currentButState == HIGH && prevButState == LOW) {
     strip.clear();
     state = (state+1) % 3;
+    if(state == 2) {
+      startTime=millis();
+      whichFrame = 0;
+    }
   }
   switch (state) {
     case 0:
@@ -82,21 +91,23 @@ void loop() {
       }
     break;
     case 2:
-      for ( int j = 0; j < numFrames; j++ ) {
-        int whichFrame = j;
-        for( int i = 0; i < numGrid; i++ ) {
-          int whichLED = i;
-          int whichIndex = index[whichLED];
-          int whichColor = frames[whichFrame][whichLED];
-    
-          int r = colors[whichColor][0];
-          int g = colors[whichColor][1];
-          int b = colors[whichColor][2];
-          strip.setPixelColor(whichIndex,r,g,b);
-        }
-        strip.show();
-        delay(1000);
+      endTime = millis();
+      if (endTime - startTime >= inter) {
+        whichFrame = (whichFrame+1) % 3;
+        startTime = millis();
       }
+      
+      for( int i = 0; i < numGrid; i++ ) {
+        int whichLED = i;
+        int whichIndex = index[whichLED];
+        int whichColor = frames[whichFrame][whichLED];
+  
+        int r = colors[whichColor][0];
+        int g = colors[whichColor][1];
+        int b = colors[whichColor][2];
+        strip.setPixelColor(whichIndex,r,g,b);
+      }
+      strip.show();
     break;
   }
 
